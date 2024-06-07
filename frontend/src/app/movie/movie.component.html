@@ -1,0 +1,144 @@
+ 
+<div class="container-fluid" style="background-image: url('https://i.pinimg.com/originals/10/b1/ba/10b1bad21f79df5f462c1c09f12db6ff.jpg'); background-size: cover; background-repeat: no-repeat;">
+  <div class="row">
+      <div class="form-container scrollbar-container" [ngClass]="{ 'show-form': showForm }">
+        <div class="card mb-4">
+        <div class="card-body">
+          <h4 class="card-title">{{ editingMovie ? 'Editar Película' : 'Agregar Película' }}</h4>
+          <form [formGroup]="movieForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label for="name">Nombre:</label>
+              <input type="text" class="form-control" id="name" formControlName="name" [ngClass]="{ 'is-invalid': submitted && movieForm.controls['name'].errors }">
+              <div *ngIf="submitted && movieForm.controls['name'].errors" class="invalid-feedback">
+                <div *ngIf="movieForm.controls['name'].errors['required']">Nombre es requerido.</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="description">Descripción:</label>
+              <input type="text" class="form-control" id="description" formControlName="description" [ngClass]="{ 'is-invalid': submitted && movieForm.controls['description'].errors }">
+              <div *ngIf="submitted && movieForm.controls['description'].errors" class="invalid-feedback">
+                <div *ngIf="movieForm.controls['description'].errors['required']">La descripción es requerida.</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="imageUrl">URL de la imagen:</label>
+              <input type="text" class="form-control" id="imageUrl" formControlName="imageUrl" [ngClass]="{ 'is-invalid': submitted && movieForm.controls['imageUrl'].errors }">
+              <div *ngIf="submitted && movieForm.controls['imageUrl'].errors" class="invalid-feedback">
+                <div *ngIf="movieForm.controls['imageUrl'].errors['required']">URL de la imagen es requerida.</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="director">Director:</label>
+              <input type="text" class="form-control" id="director" formControlName="director" [ngClass]="{ 'is-invalid': submitted && movieForm.controls['director'].errors }">
+              <div *ngIf="submitted && movieForm.controls['director'].errors" class="invalid-feedback">
+                <div *ngIf="movieForm.controls['director'].errors['required']">Director es requerido.</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="releaseYear">Año de estreno:</label>
+              <input type="number" class="form-control" id="releaseYear" formControlName="releaseYear" [ngClass]="{ 'is-invalid': submitted && movieForm.controls['releaseYear'].errors }">
+              <div *ngIf="submitted && movieForm.controls['releaseYear'].errors" class="invalid-feedback">
+                <div *ngIf="movieForm.controls['releaseYear'].errors['required']">Año de estreno es requerido.</div>
+                <div *ngIf="movieForm.controls['releaseYear'].errors['min']">Año de estreno no puede ser menor a 1888.</div>
+                <div *ngIf="movieForm.controls['releaseYear'].errors['max']">Año de estreno no puede ser mayor al año actual.</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="genre">Género:</label>
+              <input type="text" class="form-control" id="genre" formControlName="genre" [ngClass]="{ 'is-invalid': submitted && movieForm.controls['genre'].errors }">
+              <div *ngIf="submitted && movieForm.controls['genre'].errors" class="invalid-feedback">
+                <div *ngIf="movieForm.controls['genre'].errors['required']">Género es requerido.</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="duration">Duración (minutos):</label>
+              <input type="number" class="form-control" id="duration" formControlName="duration" [ngClass]="{ 'is-invalid': submitted && movieForm.controls['duration'].errors }">
+              <div *ngIf="submitted && movieForm.controls['duration'].errors" class="invalid-feedback">
+                <div *ngIf="movieForm.controls['duration'].errors['required']">Duración es requerida.</div>
+                <div *ngIf="movieForm.controls['duration'].errors['min']">Duración debe ser al menos 1 minuto.</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="rating">Rating:</label>
+              <input type="number" class="form-control" id="rating" formControlName="rating" [ngClass]="{ 'is-invalid': submitted && movieForm.controls['rating'].errors }">
+              <div *ngIf="submitted && movieForm.controls['rating'].errors" class="invalid-feedback">
+                <div *ngIf="movieForm.controls['rating'].errors['required']">El rating es requerido</div>
+                <div *ngIf="movieForm.controls['rating'].errors['min']">Rating no puede ser menor a 0.</div>
+                <div *ngIf="movieForm.controls['rating'].errors['max']">Rating no puede ser mayor a 10.</div>
+              </div>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary">{{ editingMovie ? 'Editar' : 'Agregar Película' }}</button>
+            <button type="button" class="btn btn-secondary" (click)="cancelEdit()" *ngIf="editingMovie">Cancelar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="top">
+    <div class="container-fluid ">
+      <div class="row">
+        <div class="col-md-12 list-container" [ngClass]="{ 'form-visible': showForm }">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 style="color: white;">Lista de Películas:</h2>
+            </div>
+            <div class="col-auto">
+              <input type="text" class="form-control" placeholder="Buscar..." [(ngModel)]="searchTerm" (ngModelChange)="filterMovies()">
+            </div>
+            <div class="col-auto">
+              <select class="form-select" (change)="setSortField($event)">
+                <option value="name">Nombre</option>
+                <option value="director">Director</option>
+                <option value="releaseYear">Año de estreno</option>
+                <option value="genre">Género</option>
+                <option value="duration">Duración</option>
+                <option value="rating">Rating</option>
+              </select>
+            </div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-light" (click)="toggleOrder()">
+                <span [ngClass]="ascendingOrder ? 'text-success' : 'text-danger'">
+                  {{ ascendingOrder ? 'Ascendente' : 'Descendente' }}
+                </span>
+              </button>
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-outline-primary" (click)="toggleForm()">
+                <i class="fa" [ngClass]="showForm ? 'fa-times' : 'fa-plus'"></i>
+              </button>
+            </div>
+          </div>
+    
+      <br><br>
+      <div *ngIf="successMessage" class="alert alert-success">
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div><br>
+      
+      <div class="row movie-card" >
+        <div class="col-md-4 list-card" *ngFor="let movie of filteredMovies">
+          <div class="card mb-4">
+            <div class="image-container" (mouseenter)="showDescription = movie._id" (mouseleave)="showDescription = ''"> 
+              <img [src]="movie.imageUrl" class="card-img-top" alt="Imagen de la película">
+              <div class="description-popup" *ngIf="showDescription === movie._id">
+                <p>{{ movie.description }}</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">{{ movie.name }}</h5>
+              <p class="card-text">Director: {{ movie.director }}</p>
+              <p class="card-text">Año de estreno: {{ movie.releaseYear }}</p>
+              <p class="card-text">Género: {{ movie.genre }}</p>
+              <p class="card-text">Duración: {{ movie.duration }} minutos</p>
+              <p class="card-text">Rating: {{ movie.rating }}/10</p>
+              <button class="btn btn-primary btn-edit" (click)="editMovie(movie._id)">Editar</button>
+              <button class="btn btn-danger" (click)="confirmDeleteMovie(movie._id)">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
